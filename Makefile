@@ -33,7 +33,9 @@ web-release:
 package: web-release
 	mkdir -p dist
 	rm -rf dist/*
-	cp -r index.html assets pkg dist/
+	mkdir -p dist/pkg
+	cp -r pkg/*.js pkg/*.wasm dist/pkg/
+	cp -r index.html assets dist/
 
 
 publish: pre-check package

@@ -85,6 +85,7 @@ fn prepare_time(
 }
 
 // add each entity with a mesh and a `FractalMaterial` to every view's `Transparent3d` render phase using the `FractalPipeline`
+#[allow(clippy::type_complexity)]
 fn queue_fractal(
     transparent_3d_draw_functions: Res<DrawFunctions<Transparent3d>>,
     fractal_pipeline: Res<FractalPipeline>,
