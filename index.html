@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>My Bevy Project</title>
+</head>
+<body>
+<script type="module">
+    import init from "./pkg/art.js";
+    init().then(function (wasm) {
+        wasm.run();
+    });
+</script>
+    <a href="https://github.com/dylanowen/art">Github</a><br />
+</body>
+</html>
