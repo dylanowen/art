@@ -56,4 +56,5 @@ publish: pre-check package
 clean:
 	# remove the pkg folders since leftover artifacts here can mess with wasm-opt
 	rm -rf pkg
+	rm -rf dist
 	cargo clean

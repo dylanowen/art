@@ -27,9 +27,15 @@ pub struct FractalMaterial;
 impl Plugin for FractalPlugin {
     fn build(&self, app: &mut App) {
         let render_device = app.world.get_resource::<RenderDevice>().unwrap();
+        let size = std::mem::size_of::<f32>() as u64;
+        #[cfg(target_arch = "wasm32")]
+        // TODO we're multiplying by 4 here to work around https://bugzilla.mozilla.org/show_bug.cgi?id=1569926
+        // which seems to exist in some form for FF and Chrome on Mac
+        let size = size * 4;
+
         let time_buffer = render_device.create_buffer(&BufferDescriptor {
             label: Some("time uniform buffer"),
-            size: std::mem::size_of::<f32>() as u64,
+            size,
             usage: BufferUsages::UNIFORM | BufferUsages::COPY_DST,
             mapped_at_creation: false,
         });
