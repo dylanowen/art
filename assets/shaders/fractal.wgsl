@@ -2,6 +2,7 @@
 #import bevy_pbr::mesh_struct
 
 #import "shaders/mandelbulb.wgsl"
+#import "shaders/phong.wgsl"
 
 [[group(1), binding(0)]]
 var<uniform> mesh: Mesh;
@@ -58,6 +59,16 @@ fn distance_estimator(point: vec3<f32>) -> f32 {
     return mandelbulb_de(point, time.time_since_startup / 8.0);
 }
 
+// https://iquilezles.org/www/articles/normalsSDF/normalsSDF.htm
+fn estimate_normal(point: vec3<f32>, epsilon: f32) -> vec3<f32> {
+    let estimated_normal = vec3<f32>(
+        distance_estimator(vec3<f32>(point.x + epsilon, point.y, point.z)) - distance_estimator(vec3<f32>(point.x - epsilon, point.y, point.z)),
+        distance_estimator(vec3<f32>(point.x, point.y + epsilon, point.z)) - distance_estimator(vec3<f32>(point.x, point.y - epsilon, point.z)),
+        distance_estimator(vec3<f32>(point.x, point.y, point.z + epsilon)) - distance_estimator(vec3<f32>(point.x, point.y, point.z - epsilon))
+    );
+
+    return normalize(estimated_normal);
+}
 
 fn ray_march(
     point: vec3<f32>,
@@ -97,7 +108,18 @@ fn fragment(in: VertexOutput) -> [[location(0)]] vec4<f32> {
     let march_result = ray_march(in.ray_position, ray, EPSILON, in.max_distance);
 
     if (march_result.collided) {
-        return vec4<f32>(march_result.distance, 0.0, 0.0, 1.0);
+        let normal = estimate_normal(march_result.point, EPSILON);
+        let color = phong_lighting(
+            march_result.point,
+            normal,
+            vec3<f32>(f32(march_result.steps) / f32(MAX_MARCHING_STEPS), 0., 0.2),
+            vec3<f32>(0.0, 0.1, 0.1),
+            vec3<f32>(0.0, 0.0, 1.0),
+            0.5,
+            10.0
+        );
+
+        return vec4<f32>(color, 1.0);
     }
     else {
         return vec4<f32>(0.0);
