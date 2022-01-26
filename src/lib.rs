@@ -32,6 +32,19 @@ fn setup(mut commands: Commands, mut meshes: ResMut<Assets<Mesh>>) {
         ComputedVisibility::default(),
     ));
 
+    // red point light
+    commands.spawn_bundle(PointLightBundle {
+        // transform: Transform::from_xyz(5.0, 8.0, 2.0),
+        transform: Transform::from_xyz(1.0, 2.0, 0.0),
+        point_light: PointLight {
+            intensity: 1600.0, // lumens - roughly a 100W non-halogen incandescent bulb
+            color: Color::WHITE,
+            shadows_enabled: false,
+            ..Default::default()
+        },
+        ..Default::default()
+    });
+
     // camera
     commands
         .spawn_bundle(PerspectiveCameraBundle {
