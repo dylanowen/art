@@ -1,7 +1,8 @@
 #import bevy_pbr::mesh_view_bind_group
 #import bevy_pbr::mesh_struct
 
-#import "shaders/mandelbulb.wgsl"
+#import "shaders/sdf/mandelbulb.wgsl"
+#import "shaders/bevy_utils.wgsl"
 #import "shaders/phong.wgsl"
 
 [[group(1), binding(0)]]
@@ -47,74 +48,29 @@ var<uniform> time: Time;
 let MAX_MARCHING_STEPS: u32 = 150u;
 let EPSILON: f32 = 0.001;
 
-struct MarchResult {
-    collided: bool;
-    point: vec3<f32>;
-    distance: f32;
-    steps: u32;
-};
-
 fn distance_estimator(point: vec3<f32>) -> f32 {
     //return length(point) - 0.15;
     return mandelbulb_de(point, time.time_since_startup / 8.0);
 }
 
-// https://iquilezles.org/www/articles/normalsSDF/normalsSDF.htm
-fn estimate_normal(point: vec3<f32>, epsilon: f32) -> vec3<f32> {
-    let estimated_normal = vec3<f32>(
-        distance_estimator(vec3<f32>(point.x + epsilon, point.y, point.z)) - distance_estimator(vec3<f32>(point.x - epsilon, point.y, point.z)),
-        distance_estimator(vec3<f32>(point.x, point.y + epsilon, point.z)) - distance_estimator(vec3<f32>(point.x, point.y - epsilon, point.z)),
-        distance_estimator(vec3<f32>(point.x, point.y, point.z + epsilon)) - distance_estimator(vec3<f32>(point.x, point.y, point.z - epsilon))
-    );
-
-    return normalize(estimated_normal);
-}
-
-fn ray_march(
-    point: vec3<f32>,
-    unit_ray: vec3<f32>,
-    epsilon: f32,
-    max_distance: f32
-) -> MarchResult {
-    var march_result: MarchResult;
-    march_result.collided = false;
-    march_result.point = point;
-    march_result.distance = 0.0;
-    march_result.steps = 0u;
-
-    for (; march_result.steps < MAX_MARCHING_STEPS; march_result.steps = march_result.steps + 1u) {
-        let estimated_distance = distance_estimator(march_result.point);
-        march_result.distance = march_result.distance + estimated_distance;
-        march_result.point = march_result.point + (unit_ray * estimated_distance);
-
-        // if we're close enough break out
-        if (estimated_distance < epsilon) {
-            march_result.collided = true;
-            break;
-        }
-        else if (march_result.distance > max_distance) {
-            // we've marched too far
-            break;
-        }
-    }
-
-    return march_result;
-}
+// TODO distance_estimator should be in module scope https://gpuweb.github.io/gpuweb/wgsl/#module-scope
+// but since it isn't, abuse the preprocessor
+#import "shaders/sdf/lib.wgsl"
 
 [[stage(fragment)]]
 fn fragment(in: VertexOutput) -> [[location(0)]] vec4<f32> {
     // interpolation doesn't work across vectors like this since it would change our projection, so calculate here
     let ray = normalize(in.world_position - view.world_position);
-    let march_result = ray_march(in.ray_position, ray, EPSILON, in.max_distance);
+    let march_result = ray_march(in.ray_position, ray, MAX_MARCHING_STEPS, EPSILON, in.max_distance);
 
     if (march_result.collided) {
         let normal = estimate_normal(march_result.point, EPSILON);
         let color = phong_lighting(
             march_result.point,
             normal,
-            vec3<f32>(f32(march_result.steps) / f32(MAX_MARCHING_STEPS), 0., 0.2),
-            vec3<f32>(0.0, 0.1, 0.1),
+            lights.ambient_color.xyz,
             vec3<f32>(0.0, 0.0, 1.0),
+            vec3<f32>(f32(march_result.steps) / f32(MAX_MARCHING_STEPS), 0., 0.2),
             0.5,
             10.0
         );
