@@ -1,4 +1,4 @@
-use art::run;
+use fractal::run;
 
 fn main() {
     run();

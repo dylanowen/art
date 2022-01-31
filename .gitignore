@@ -2,8 +2,8 @@
 # will have compiled files and executables
 /target/
 /bin/
-/pkg/
-/dist/
+/*/pkg/
+/**/dist/
 
 # Remove Cargo.lock from gitignore if creating a library, leave it for executables
 # More information here https://doc.rust-lang.org/cargo/guide/cargo-toml-vs-cargo-lock.html

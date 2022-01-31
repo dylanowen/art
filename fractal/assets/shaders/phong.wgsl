@@ -1,4 +1,4 @@
-#import "shaders/bevy_utils.wgsl"
+// #import "shaders/bevy_utils.wgsl"
 
 // https://en.wikipedia.org/wiki/Blinn%E2%80%93Phong_reflection_model
 fn phong_lighting(

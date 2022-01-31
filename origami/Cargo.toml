@@ -1,0 +1,29 @@
+[package]
+name = "origami"
+version = "0.0.1"
+authors = ["Dylan"]
+edition = "2021"
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+
+[features]
+dynamic = [ "bevy/dynamic" ]
+
+[dependencies]
+log = "0.4"
+anyhow = "1.0"
+
+wasm-bindgen = "=0.2.78"
+
+bevy = { version = "0.6.0", default-features = false, features = [
+    "bevy_audio",
+    # "bevy_gilrs", doesn't work for Firefox
+    "bevy_winit",
+    "render",
+    # "png",
+    "hdr",
+    # "vorbis",
+    "x11",
+    "filesystem_watcher"
+] }

@@ -1,41 +1,25 @@
-[package]
-name = "art"
-version = "0.0.1"
-authors = ["Dylan"]
-edition = "2021"
+[workspace]
 resolver = "2"
 
-[lib]
-crate-type = ["cdylib", "rlib"]
+members = [
+"fractal",
+"origami",
+]
 
-[[bin]]
-name = "art"
+[profile.release]
+# less code to include into binary
+panic = 'abort'
+# optimization over all codebase ( better optimization, slower build )
+codegen-units = 1
+# optimization for size ( more aggressive )
+opt-level = 's'
+# link time optimization using using whole-program analysis
+lto = true
 
 # Enable optimizations for dependencies (incl. Bevy), but not for our code:
 [profile.dev.package."*"]
 opt-level = 3
 
-# Maybe also enable only a small amount of optimization for our code:
 [profile.dev]
-opt-level = 1
-
-[features]
-dynamic = [ "bevy/dynamic" ]
-
-[dependencies]
-log = "0.4"
-anyhow = "1.0"
-
-wasm-bindgen = "=0.2.78"
-
-bevy = { version = "0.6.0", default-features = false, features = [
-    "bevy_audio",
-    # "bevy_gilrs", doesn't work for Firefox
-    "bevy_winit",
-    "render",
-    # "png",
-    "hdr",
-    # "vorbis",
-    "x11",
-    "filesystem_watcher"
-] }
+#opt-level = 1
+split-debuginfo = "unpacked"

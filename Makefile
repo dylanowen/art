@@ -1,7 +1,16 @@
 SHELL:=/bin/bash
 
-# .DEFAULT_GOAL := default
-.PHONY: check fix format lint pre-check dev release web-dev web-release package publish clean
+PROJECTS := fractal origami
+PROJECT_PACKAGES := $(foreach project,$(PROJECTS),$(project)-package)
+PROJECT_TARGETS := $(foreach \
+	target, \
+	run web release, \
+	$(foreach project,$(PROJECTS),$(project)-$(target))\
+) $(PROJECT_PACKAGES)
+
+$(info $$PROJECT_TARGETS is [${PROJECT_TARGETS}])
+
+.PHONY: check fix format lint pre-check $(PROJECTS) $(PROJECT_TARGETS) package publish clean
 
 # "This will essentially compile the packages without performing the final step of code generation, which is faster than running cargo build."
 check:
@@ -11,7 +20,7 @@ check:
 fix:
 	cargo fix --allow-staged
 
-format:
+fmt:
 	cargo fmt
 
 lint:
@@ -21,21 +30,21 @@ lint:
 # run all of our formatting / lints / fixes and check our various compile targets
 pre-check: fix format lint check
 
-dev:
-	cargo run --features bevy/dynamic
+$(PROJECTS):
+	$(MAKE) -C $@ run
 
-web-dev:
-	wasm-pack build --target web --dev
+$(PROJECT_TARGETS):
+	project=$$(cut -f 1 -d- <<<"$@"); \
+	target=$$(cut -f 2 -d- <<<"$@"); \
+	$(MAKE) -C $${project} $${target}
 
-web-release:
-	wasm-pack build --target web --release
-
-package: web-release
+package: $(PROJECT_PACKAGES)
 	mkdir -p dist
 	rm -rf dist/*
-	mkdir -p dist/pkg
-	cp -r pkg/*.js pkg/*.wasm dist/pkg/
-	cp -r index.html assets dist/
+	for project in $(PROJECTS) ; do \
+  		cp -r $${project}/dist dist/$${project} ; \
+  	done
+	cp -r index.html dist/
 
 
 publish: pre-check package
@@ -54,7 +63,8 @@ publish: pre-check package
 	git worktree remove /tmp/gh-pages
 
 clean:
-	# remove the pkg folders since leftover artifacts here can mess with wasm-opt
-	rm -rf pkg
 	rm -rf dist
+	for project in $(PROJECTS) ; do \
+		$(MAKE) -C $${project} clean ; \
+	done
 	cargo clean

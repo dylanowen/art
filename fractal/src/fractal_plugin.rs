@@ -28,9 +28,10 @@ impl Plugin for FractalPlugin {
     fn build(&self, app: &mut App) {
         let render_device = app.world.get_resource::<RenderDevice>().unwrap();
         let size = std::mem::size_of::<f32>() as u64;
-        #[cfg(target_arch = "wasm32")]
+
         // TODO we're multiplying by 4 here to work around https://bugzilla.mozilla.org/show_bug.cgi?id=1569926
         // which seems to exist in some form for FF and Chrome on Mac
+        #[cfg(target_arch = "wasm32")]
         let size = size * 4;
 
         let time_buffer = render_device.create_buffer(&BufferDescriptor {
