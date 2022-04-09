@@ -2,13 +2,11 @@ use bevy::input::system::exit_on_esc_system;
 use bevy::prelude::*;
 use wasm_bindgen::prelude::*;
 
-use pan_orbit_camera::pan_orbit_camera;
+use shared::pan_orbit_camera::{pan_orbit_camera, PanOrbitCamera};
 
 use crate::fractal_plugin::{FractalMaterial, FractalPlugin};
-use crate::pan_orbit_camera::PanOrbitCamera;
 
 mod fractal_plugin;
-mod pan_orbit_camera;
 
 #[wasm_bindgen(start)]
 pub fn run() {

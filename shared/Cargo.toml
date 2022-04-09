@@ -1,22 +1,11 @@
 [package]
-name = "origami"
+name = "shared"
 version = "0.0.1"
 authors = ["Dylan"]
 edition = "2021"
 
-[lib]
-crate-type = ["cdylib", "rlib"]
-
-[features]
-dynamic = [ "bevy/dynamic" ]
-
 [dependencies]
-shared = { path = "../shared" }
-
 log = "0.4"
-anyhow = "1.0"
-
-wasm-bindgen = "=0.2.78"
 
 bevy = { version = "0.6", default-features = false, features = [
     "bevy_audio",

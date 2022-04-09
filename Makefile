@@ -10,12 +10,7 @@ PROJECT_TARGETS := $(foreach \
 
 $(info $$PROJECT_TARGETS is [${PROJECT_TARGETS}])
 
-.PHONY: check fix format lint pre-check $(PROJECTS) $(PROJECT_TARGETS) package publish clean
-
-# "This will essentially compile the packages without performing the final step of code generation, which is faster than running cargo build."
-check:
-	cargo check
-	cargo check --target wasm32-unknown-unknown
+.PHONY: check fix fmt lint pre-check $(PROJECTS) $(PROJECT_TARGETS) package publish clean
 
 fix:
 	cargo fix --allow-staged
@@ -26,6 +21,11 @@ fmt:
 lint:
 	cargo clippy --all-targets --all-features -- -D warnings
 	-cargo audit
+
+# "This will essentially compile the packages without performing the final step of code generation, which is faster than running cargo build."
+check:
+	cargo check
+	cargo check --target wasm32-unknown-unknown
 
 # run all of our formatting / lints / fixes and check our various compile targets
 pre-check: fix format lint check

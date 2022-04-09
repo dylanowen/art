@@ -95,7 +95,7 @@ pub fn pan_orbit_camera(
             pan_orbit.focus += translation;
         } else if scroll.abs() > 0.0 {
             any = true;
-            pan_orbit.radius -= scroll * pan_orbit.radius * 0.001;
+            pan_orbit.radius -= scroll * pan_orbit.radius * 0.01;
             // dont allow zoom to reach zero or you get stuck
             pan_orbit.radius = f32::max(pan_orbit.radius, 0.05);
         }
