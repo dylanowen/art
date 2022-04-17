@@ -1,10 +1,10 @@
 SHELL:=/bin/bash
 
-PROJECTS := fractal origami
+PROJECTS := boids fractal
 PROJECT_PACKAGES := $(foreach project,$(PROJECTS),$(project)-package)
 PROJECT_TARGETS := $(foreach \
 	target, \
-	run web release, \
+	run run-release web release, \
 	$(foreach project,$(PROJECTS),$(project)-$(target))\
 ) $(PROJECT_PACKAGES)
 
@@ -12,14 +12,16 @@ $(info $$PROJECT_TARGETS is [${PROJECT_TARGETS}])
 
 .PHONY: check fix fmt lint pre-check $(PROJECTS) $(PROJECT_TARGETS) package publish clean
 
-fix:
-	cargo fix --allow-staged
-
 fmt:
-	cargo fmt
+	cargo fmt --all
+
+fix:
+	cargo fix --allow-staged --all-targets
+	cargo clippy --all-targets --fix --allow-staged
 
 lint:
-	cargo clippy --all-targets --all-features -- -D warnings
+	cargo fmt --all -- --check
+	cargo clippy --all-targets -- -D warnings
 	-cargo audit
 
 # "This will essentially compile the packages without performing the final step of code generation, which is faster than running cargo build."
@@ -28,7 +30,7 @@ check:
 	cargo check --target wasm32-unknown-unknown
 
 # run all of our formatting / lints / fixes and check our various compile targets
-pre-check: fix format lint check
+pre-check: fmt fix lint check
 
 $(PROJECTS):
 	$(MAKE) -C $@ run

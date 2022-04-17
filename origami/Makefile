@@ -6,6 +6,9 @@ SHELL:=/bin/bash
 run:
 	cargo run --features bevy/dynamic
 
+run-release:
+	cargo run --release
+
 web:
 	wasm-pack build --target web --dev
 

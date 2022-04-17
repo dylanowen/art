@@ -2,8 +2,8 @@
 resolver = "2"
 
 members = [
+    "boids",
     "fractal",
-    "origami",
 
     "shared"
 ]
